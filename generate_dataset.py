@@ -1,50 +1,47 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-# ============================================================================
+# ===============================================================
 # UNDERGROUND CABLE FAULT DETECTION - DATASET GENERATION
-# ============================================================================
+# ===============================================================
 
-np.random.seed(42)
+n_samples = 120
 
-# Number of samples
-n_samples = 300
+print("Generating underground cable dataset...")
 
-# Generate Features: voltage, current, temperature, resistance, insulation_resistance, age
-# These are realistic parameters for underground power cables
+# Generate parameters
+voltage = np.random.normal(11, 1.5, n_samples)
+current = np.random.normal(45, 12, n_samples)
+temperature = np.random.normal(35, 8, n_samples)
+resistance = np.random.normal(0.45, 0.08, n_samples)
+insulation_resistance = np.random.normal(1.5, 0.3, n_samples)
+age = np.random.uniform(0, 30, n_samples)
 
-# Normal operating conditions with some variations
-voltage = np.random.normal(11, 1.5, n_samples)  # kV
-current = np.random.normal(45, 12, n_samples)  # Amperes
-temperature = np.random.normal(35, 8, n_samples)  # Celsius
-resistance = np.random.normal(0.45, 0.08, n_samples)  # Ohms
-insulation_resistance = np.random.normal(1.5, 0.3, n_samples)  # Megaohms
-age = np.random.uniform(0, 30, n_samples)  # Years
+# Simulate cable lengths (1km to 5km)
+cable_length = np.random.uniform(1, 5, n_samples)
 
-# Create labels (0: No Fault, 1: Fault Detected)
-# Fault detection logic based on physical parameters
 fault = np.zeros(n_samples, dtype=int)
+fault_distance = np.zeros(n_samples)
 
-# Faulty cables have: high temperature AND degraded insulation OR high resistance
+# Randomly select 3-10 cables to have faults
+num_faults = np.random.randint(3, 11)
+fault_indices = np.random.choice(n_samples, size=num_faults, replace=False)
+
+# Assign faults to randomly selected cables
+for i in fault_indices:
+    fault[i] = 1
+    # Also increase parameters for faulty cables to make them more realistic
+    temperature[i] += np.random.uniform(10, 20)
+    insulation_resistance[i] -= np.random.uniform(0.3, 0.7)
+    resistance[i] += np.random.uniform(0.1, 0.25)
+    fault_distance[i] = np.random.uniform(0.1, cable_length[i])
+
+# Set fault distance to 0 for non-faulty cables
 for i in range(n_samples):
-    fault_indicators = 0
-    if temperature[i] > 50:
-        fault_indicators += 1
-    if insulation_resistance[i] < 0.8:
-        fault_indicators += 1
-    if resistance[i] > 0.65:
-        fault_indicators += 1
-    if current[i] > 70:  # Overload condition
-        fault_indicators += 1
-    if age[i] > 20:  # Old cables more prone to faults
-        fault_indicators += 1
-    
-    if fault_indicators >= 2:
-        fault[i] = 1
+    if fault[i] == 0:
+        fault_distance[i] = 0
 
-# Create DataFrame
+# Create dataframe
 df = pd.DataFrame({
     'voltage': voltage,
     'current': current,
@@ -52,61 +49,14 @@ df = pd.DataFrame({
     'resistance': resistance,
     'insulation_resistance': insulation_resistance,
     'cable_age': age,
+    'cable_length_km': cable_length,
+    'fault_distance_km': fault_distance,
     'label': fault
 })
 
-# Save dataset
 df.to_csv("underground_cable_dataset.csv", index=False)
 
-# Print detailed statistics
-print("=" * 70)
-print("UNDERGROUND CABLE FAULT DETECTION - DATASET OVERVIEW")
-print("=" * 70)
-print(f"\n✓ Dataset generated and saved as 'underground_cable_dataset.csv'")
-print(f"\nDataset Statistics:")
-print(f"  • Total samples: {len(df)}")
-print(f"  • Fault-free samples: {sum(fault == 0)} ({100*sum(fault == 0)/len(df):.1f}%)")
-print(f"  • Faulty samples: {sum(fault == 1)} ({100*sum(fault == 1)/len(df):.1f}%)")
-print(f"  • Class balance ratio: {sum(fault == 1) / sum(fault == 0):.2f}:1")
-
-print(f"\nFeature Statistics:")
-print(df.describe().round(3))
-
-print(f"\nDataset Preview (first 10 rows):")
-print(df.head(10).to_string())
-
-# Visualizations
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-fig.suptitle('Underground Cable Features Distribution by Fault Status', fontsize=14, fontweight='bold')
-
-features = ['voltage', 'current', 'temperature', 'resistance', 'insulation_resistance', 'cable_age']
-
-for idx, feature in enumerate(features):
-    ax = axes[idx // 3, idx % 3]
-    
-    # Histogram with separation by fault status
-    fault_data = df[df['label'] == 1][feature]
-    normal_data = df[df['label'] == 0][feature]
-    
-    ax.hist(normal_data, bins=20, alpha=0.6, label='No Fault', color='green')
-    ax.hist(fault_data, bins=20, alpha=0.6, label='Fault', color='red')
-    ax.set_xlabel(feature.replace('_', ' ').title(), fontsize=10)
-    ax.set_ylabel('Frequency', fontsize=10)
-    ax.legend()
-    ax.grid(alpha=0.3)
-
-plt.tight_layout()
-plt.savefig('feature_distributions.png', dpi=100, bbox_inches='tight')
-print("\n✓ Feature distributions saved as 'feature_distributions.png'")
-
-# Correlation heatmap
-plt.figure(figsize=(10, 8))
-correlation = df.corr()
-sns.heatmap(correlation, annot=True, fmt='.2f', cmap='coolwarm', center=0, 
-            square=True, linewidths=1, cbar_kws={"shrink": 0.8})
-plt.title('Feature Correlation Matrix', fontsize=12, fontweight='bold')
-plt.tight_layout()
-plt.savefig('correlation_matrix.png', dpi=100, bbox_inches='tight')
-print("✓ Correlation matrix saved as 'correlation_matrix.png'")
-
-print("\n" + "=" * 70)
+print(f"✓ Dataset created with {len(df)} samples")
+print(f"  • Normal cables: {sum(fault == 0)}")
+print(f"  • Faulty cables: {sum(fault == 1)}")
+print("✓ Saved as underground_cable_dataset.csv")
