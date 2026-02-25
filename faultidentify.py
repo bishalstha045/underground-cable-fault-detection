@@ -44,7 +44,6 @@ if len(faulty_cables) > 0:
         print(f"   Resistance Deviation: {row['resistance'] - 0.45:.3f} Ω")
         print(f"   Insulation Drop: {1.5 - row['insulation_resistance']:.2f} MΩ")
 
-        # Severity estimation
         severity_score = 0
         
         if row['temperature'] > 50:
@@ -69,7 +68,6 @@ if len(faulty_cables) > 0:
         print("="*80)
 
     print(f"\nTotal Faulty Cables Detected: {len(faulty_cables)}")
-
 else:
     print("\n" + "="*80)
     print("✅ ALL CABLES OPERATING NORMALLY")
