@@ -123,12 +123,9 @@ for name, model in models.items():
     print(f"  False Positives: {cm[0, 1]}")
     print(f"  False Negatives: {cm[1, 0]}")
     print(f"  True Positives:  {cm[1, 1]}")
-
-# ============================================================================
 print("\n" + "=" * 70)
 print("MODEL PERSISTENCE")
 print("=" * 70)
-
 # Save best model (SVM)
 joblib.dump(svm_model, 'svm_model.pkl')
 joblib.dump(scaler, 'scaler.pkl')
