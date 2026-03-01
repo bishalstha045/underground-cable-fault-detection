@@ -44,6 +44,27 @@ if len(faulty_cables) > 0:
         print(f"   Resistance Deviation: {row['resistance'] - 0.45:.3f} Ω")
         print(f"   Insulation Drop: {1.5 - row['insulation_resistance']:.2f} MΩ")
 
+        # Identify Fault Type
+        fault_types = []
+        
+        if row['temperature'] > 50:
+            fault_types.append("THERMAL FAULT (Excessive Temperature)")
+        if row['current'] > 70:
+            fault_types.append("CURRENT OVERLOAD (High Current)")
+        if row['resistance'] > 0.65:
+            fault_types.append("RESISTANCE FAULT (High Resistance)")
+        if row['insulation_resistance'] < 0.8:
+            fault_types.append("INSULATION BREAKDOWN (Low Insulation Resistance)")
+        if row['cable_age'] > 20:
+            fault_types.append("AGE DEGRADATION (Cable Age > 20 years)")
+
+        print("\n🔍 FAULT TYPE:")
+        if fault_types:
+            for i, fault_type in enumerate(fault_types, 1):
+                print(f"   {i}. {fault_type}")
+        else:
+            print("   Type: UNCLASSIFIED ANOMALY")
+
         severity_score = 0
         
         if row['temperature'] > 50:

@@ -55,7 +55,7 @@ rf_model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=1
 rf_model.fit(X_train_scaled, y_train)
 print("   ✓ Model trained")
 
-# 3. Logistic Regression
+# 3. Logistic Regression    
 print("\n3. Logistic Regression - Training...")
 lr_model = LogisticRegression(max_iter=1000, random_state=42)
 lr_model.fit(X_train_scaled, y_train)
